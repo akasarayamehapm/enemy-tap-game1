@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30秒！敵タップゲーム</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #111827;
+        color: white;
+        font-family: sans-serif;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    h1 {
+        margin: 15px 0 8px;
+        font-size: 25px;
+    }
+
+    #info {
+        display: flex;
+        justify-content: space-around;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    #game {
+        position: relative;
+        width: 95vw;
+        max-width: 600px;
+        height: 70vh;
+        margin: auto;
+        background: #1f2937;
+        border: 3px solid #4b5563;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    #enemy {
+        position: absolute;
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background: #ef4444;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 35px;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 0 20px #ef4444;
+    }
+
+    button {
+        margin: 15px;
+        padding: 12px 25px;
+        font-size: 18px;
+        border: none;
+        border-radius: 10px;
+        background: #3b82f6;
+        color: white;
+        cursor: pointer;
+    }
+
+    #message {
+        font-size: 20px;
+        margin: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>👾 30秒！敵タップゲーム</h1>
+
+<div id="info">
+    <div>⏱️ <span id="time">30</span></div>
+    <div>🏆 <span id="score">0</span></div>
+    <div>🔥 <span id="combo">0</span></div>
+</div>
+
+<div id="message">
+    「スタート」を押してね！
+</div>
+
+<div id="game">
+    <div id="enemy">👾</div>
+</div>
+
+<button onclick="startGame()">スタート！</button>
+
+<script>
+
+let score = 0;
+let combo = 0;
+let time = 30;
+let gameRunning = false;
+let timer;
+let enemyTimer;
+
+const enemy = document.getElementById("enemy");
+const game = document.getElementById("game");
+const scoreText = document.getElementById("score");
+const comboText = document.getElementById("combo");
+const timeText = document.getElementById("time");
+const message = document.getElementById("message");
+
+function startGame() {
+
+    score = 0;
+    combo = 0;
+    time = 30;
+    gameRunning = true;
+
+    scoreText.textContent = score;
+    comboText.textContent = combo;
+    timeText.textContent = time;
+
+    message.textContent = "👾 敵をタップしろ！";
+
+    enemy.style.display = "flex";
+
+    moveEnemy();
+
+    clearInterval(timer);
+
+    timer = setInterval(() => {
+
+        time--;
+        timeText.textContent = time;
+
+        if (time <= 0) {
+            endGame();
+        }
+
+    }, 1000);
+
+    clearTimeout(enemyTimer);
+    scheduleEnemy();
+}
+
+function moveEnemy() {
+
+    const maxX = game.clientWidth - enemy.offsetWidth;
+    const maxY = game.clientHeight - enemy.offsetHeight;
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    enemy.style.left = x + "px";
+    enemy.style.top = y + "px";
+}
+
+enemy.addEventListener("click", () => {
+
+    if (!gameRunning) return;
+
+    score++;
+    combo++;
+
+    scoreText.textContent = score;
+    comboText.textContent = combo;
+
+    moveEnemy();
+    scheduleEnemy();
+});
+
+function scheduleEnemy() {
+
+    if (!gameRunning) return;
+
+    // スコアが高くなるほど敵が速くなる
+    const speed = Math.max(250, 1000 - score * 25);
+
+    clearTimeout(enemyTimer);
+
+    enemyTimer = setTimeout(() => {
+
+        moveEnemy();
+
+        // 逃したらコンボリセット
+        combo = 0;
+        comboText.textContent = combo;
+
+        scheduleEnemy();
+
+    }, speed);
+}
+
+function endGame() {
+
+    gameRunning = false;
+
+    clearInterval(timer);
+    clearTimeout(enemyTimer);
+
+    enemy.style.display = "none";
+
+    message.textContent =
+        "🎉 ゲーム終了！ スコア：" + score + "点";
+
+}
+
+</script>
+
+</body>
+</html>    
